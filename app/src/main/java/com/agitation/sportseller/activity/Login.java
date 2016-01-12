@@ -8,7 +8,6 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.agitation.sportseller.BaseActivity;
-import com.agitation.sportseller.MainActivity;
 import com.agitation.sportseller.R;
 import com.agitation.sportseller.utils.MapTransformer;
 import com.agitation.sportseller.utils.Mark;

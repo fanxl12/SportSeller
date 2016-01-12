@@ -58,4 +58,8 @@ dependencies {
     compile files('libs/jackson-annotations-2.4.0.jar')
     compile files('libs/jackson-databind-2.4.2.jar')
     compile files('libs/jackson-core-2.4.2.jar')
+    //上拉刷新下拉翻页
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'cn.bingoogolapple:bga-refreshlayout:1.1.2@aar'
+
 }
