@@ -1,5 +1,6 @@
 package com.agitation.sportseller.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -23,7 +24,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.main_course_order:
-
+                startActivity(new Intent(this, CourseOrder.class));
                 break;
         }
     }

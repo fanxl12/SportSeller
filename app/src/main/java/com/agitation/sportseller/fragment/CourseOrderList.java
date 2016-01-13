@@ -1,13 +1,11 @@
 package com.agitation.sportseller.fragment;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.agitation.sportseller.BaseFragment;
@@ -15,15 +13,8 @@ import com.agitation.sportseller.R;
 import com.agitation.sportseller.adapter.CourseOrderAdapter;
 import com.agitation.sportseller.inter.OrderNotice;
 import com.agitation.sportseller.utils.DataHolder;
-import com.agitation.sportseller.utils.MapTransformer;
-import com.agitation.sportseller.utils.Mark;
-import com.agitation.sportseller.utils.ToastUtils;
-import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,11 +32,9 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
     private BGARefreshLayout swipe_container;
     private ListView tickey_list_lv;
     private int status;
-    private DataHolder dataHolder;
-    private AQuery aq;
     public static final String STATUS_NAME_KEY = "STATUS_NAME_KEY";
-    public static final int COMMENT_SUCCEED = 140;
     private String orderId;
+    private DataHolder dataHolder;
 
     public static CourseOrderList getInstance(int status){
         Bundle bundle = new Bundle();
@@ -67,29 +56,15 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
             init();
             initVarible();
             processLogic();
-            if(dataHolder.isLogin()){
-                getCourseOrderList();
-            }else {
-                ToastUtils.showToast(getContext(), "请登录");
-            }
         }
         return rootView;
     }
 
     private void initVarible() {
-        aq = new AQuery(getContext());
-        dataHolder = DataHolder.getInstance();
         orderList = new ArrayList<>();
+        dataHolder = DataHolder.getInstance();
         courseOrderAdapter = new CourseOrderAdapter(getActivity(), status, orderList, R.layout.courseorder_list_item);
         tickey_list_lv.setAdapter(courseOrderAdapter);
-        tickey_list_lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Intent intent = new Intent(getActivity(), CourseDetail.class);
-//                intent.putExtra("courseId", orderList.get(position).get("courseId") + "");
-//                startActivity(intent);
-            }
-        });
 
         courseOrderAdapter.setOnBtnClickListener(new CourseOrderAdapter.OnBtnClickListener() {
             @Override
@@ -117,50 +92,12 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
         });
     }
 
-    //获取订单数据
-    public void getCourseOrderList(){
-        mActivity.showLoadingDialog();
-        String url = Mark.getServerIp() + "/api/v1/order/getCourseOrderList";
-        aq.transformer(new MapTransformer()).auth(dataHolder.getBasicHandle())
-                .ajax(url, Map.class, new AjaxCallback<Map>() {
-                    @Override
-                    public void callback(String url, Map info, AjaxStatus status) {
-                        mActivity.dismissLoadingDialog();
-                        if (info != null) {
-                            if (Boolean.parseBoolean(info.get("result") + "")) {
-                                Map<String, Object> retData = (Map<String, Object>) info.get("retData");
-                                List<Map<String, Object>> courseOrderList = (List<Map<String, Object>>) retData.get("courseOrderList");
-                                selectedOrderData(courseOrderList);
-                            }
-                        }
-                    }
-                });
-    }
 
-    //删除订单
-    public void deleteOrder(){
-        mActivity.showLoadingDialog();
-        String url = Mark.getServerIp() + "/api/v1/order/deleteOrder";
-        Map<String, Object> param = new HashMap<>();
-        param.put("id", orderId);
-        aq.transformer(new MapTransformer()).auth(dataHolder.getBasicHandle())
-                .ajax(url, param, Map.class, new AjaxCallback<Map>() {
-                    @Override
-                    public void callback(String url, Map info, AjaxStatus status) {
-                        mActivity.dismissLoadingDialog();
-                        if (info != null) {
-                            if (Boolean.parseBoolean(info.get("result") + "")) {
-                                getCourseOrderList();
-                            }
-                        }
-                    }
-                });
-    }
 
     protected void processLogic() {
         BGAStickinessRefreshViewHolder stickinessRefreshViewHolder = new BGAStickinessRefreshViewHolder(getActivity(), false);
         stickinessRefreshViewHolder.setStickinessColor(R.color.colorPrimary);
-//        stickinessRefreshViewHolder.setRotateImage(R.mipmap.bga_refresh_stickiness);
+        stickinessRefreshViewHolder.setRotateImage(R.mipmap.bga_refresh_stickiness);
         swipe_container.setRefreshViewHolder(stickinessRefreshViewHolder);
         swipe_container.setDelegate(this);
     }
@@ -170,33 +107,28 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
         tickey_list_lv = (ListView)rootView.findViewById(R.id.course_list_lv);
     }
 
-    public void selectedOrderData(List<Map<String, Object>> courseOrderList){
-//        orderList = UtilsHelper.selectMapList(courseOrderList, "get(:_currobj,'status') like '" + status + "'");
-//        courseOrderAdapter.setData(orderList);
-//        refreshHandler.sendEmptyMessageDelayed(Mark.DATA_REFRESH_SUCCEED, 2000);
-    }
-
     @Override
     public void dataChange() {
-
-    }
-
-    private Handler refreshHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-//            if (msg.what==Mark.DATA_REFRESH_SUCCEED){
-//                swipe_container.endRefreshing();
-//            }
+        List<Map<String, Object>> allData = DataHolder.getInstance().getOrderList();
+        for (Map<String, Object> item : allData){
+            int orderStatus = Integer.parseInt(item.get("status")+"");
+            if (status==orderStatus || (status==3 && orderStatus==4)){
+                orderList.add(item);
+            }
         }
-    };
+        Log.d("status", status+"");
+        courseOrderAdapter.setData(orderList);
+    }
 
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout bgaRefreshLayout) {
-        getCourseOrderList();
+
     }
 
     @Override
     public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout bgaRefreshLayout) {
         return false;
     }
+
+
 }

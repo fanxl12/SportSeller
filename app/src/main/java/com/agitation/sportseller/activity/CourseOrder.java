@@ -10,40 +10,41 @@ import android.view.View;
 
 import com.agitation.sportseller.BaseActivity;
 import com.agitation.sportseller.R;
+import com.agitation.sportseller.fragment.CourseOrderList;
+import com.agitation.sportseller.inter.OrderNotice;
+import com.agitation.sportseller.utils.MapTransformer;
 import com.agitation.sportseller.utils.Mark;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by fanwl on 2015/11/14.
  */
 public class CourseOrder extends BaseActivity {
 
-    public static final int ORDER_STATUS_UNCONFIRM = 0;
-    public static final int ORDER_STATUS_CONFIRM = 1;
-    public static final int ORDER_STATUS_DONE = 2;
+    public static final int ORDER_STATUS_UNCONFIRM = 1;
+    public static final int ORDER_STATUS_CONFIRM = 2;
+    public static final int ORDER_STATUS_DONE = 3;
 
     private TabLayout tab_course_appointment;
     private ViewPager pager_course_appointment;
     private List<Integer> statusList = Arrays.asList(ORDER_STATUS_UNCONFIRM, ORDER_STATUS_CONFIRM, ORDER_STATUS_DONE);
     private List<String> orderTitle = Arrays.asList("待确认", "已确认", "已完成");
-
+    private List<Fragment> fragments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.course_order);
         initToolbar();
-        initVarible();
         init();
+        getCourseOrderList();
     }
-
-    private void initVarible() {
-
-    }
-
 
     private void initToolbar() {
         if (toolbar!=null){
@@ -72,12 +73,42 @@ public class CourseOrder extends BaseActivity {
     }
 
     private void setupViewPager(ViewPager mViewPager) {
-        MyPagerAdapter pagerAdapter =
-                new MyPagerAdapter(getSupportFragmentManager());
+        fragments = new ArrayList<>();
+        MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         for (int i=0; i<orderTitle.size(); i++){
-            pagerAdapter.addFragment(CourseOrderList.getInstance(statusList.get(i)), orderTitle.get(i));
+            Fragment fragment = CourseOrderList.getInstance(statusList.get(i));
+            fragments.add(fragment);
+            pagerAdapter.addFragment(fragment, orderTitle.get(i));
         }
         mViewPager.setAdapter(pagerAdapter);
+    }
+
+    //获取订单数据
+    public void getCourseOrderList(){
+        showLoadingDialog();
+        String url = Mark.getServerIp() + "/api/v1/order/getCourseOrder4Seller";
+        aq.transformer(new MapTransformer()).auth(dataHolder.getBasicHandle())
+                .ajax(url, Map.class, new AjaxCallback<Map>() {
+                    @Override
+                    public void callback(String url, Map info, AjaxStatus status) {
+                        dismissLoadingDialog();
+                        if (info != null) {
+                            if (Boolean.parseBoolean(info.get("result") + "")) {
+                                Map<String, Object> retData = (Map<String, Object>) info.get("retData");
+                                List<Map<String, Object>> courseOrderList = (List<Map<String, Object>>) retData.get("courseOrderList");
+                                dataHolder.setOrderList(courseOrderList);
+                                updateData();
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void updateData() {
+        for (Fragment fragment : fragments){
+            OrderNotice oN = (OrderNotice) fragment;
+            oN.dataChange();
+        }
     }
 
     class MyPagerAdapter extends FragmentPagerAdapter {
