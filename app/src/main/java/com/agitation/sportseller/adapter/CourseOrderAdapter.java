@@ -3,6 +3,7 @@ package com.agitation.sportseller.adapter;
 import android.content.Context;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.agitation.sportseller.R;
 import com.agitation.sportseller.utils.ViewHolder;
@@ -40,10 +41,14 @@ public class CourseOrderAdapter extends CommonAdapter<Map<String, Object>> {
         helper.setText(R.id.course_order_match_time,item.get("createDate")+"");
         helper.setText(R.id.course_order_match_address,item.get("address")+"");
 
+        LinearLayout order_item_ll = helper.getView(R.id.order_item_ll);
+
         Button bt_pay = helper.getView(R.id.course_order_bt_pay);
         Button bt_delete = helper.getView(R.id.course_order_bt_delete);
         bt_pay.setTag(item);
         bt_delete.setTag(item);
+
+
 //        if (status== Mark.ORDER_STATUS_UNPAY){
 //            bt_pay.setText("支付");
 //            bt_delete.setText("删除");

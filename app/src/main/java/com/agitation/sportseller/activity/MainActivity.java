@@ -6,12 +6,14 @@ import android.view.View;
 
 import com.agitation.sportseller.BaseActivity;
 import com.agitation.sportseller.R;
+import com.umeng.update.UmengUpdateAgent;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UmengUpdateAgent.update(this);
         setContentView(R.layout.activity_main);
         initView();
     }

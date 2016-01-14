@@ -2,7 +2,6 @@ package com.agitation.sportseller.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +55,7 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
             init();
             initVarible();
             processLogic();
+            dataChange();
         }
         return rootView;
     }
@@ -109,14 +109,14 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
 
     @Override
     public void dataChange() {
-        List<Map<String, Object>> allData = DataHolder.getInstance().getOrderList();
+        if (courseOrderAdapter==null)return;
+        List<Map<String, Object>> allData = dataHolder.getOrderList();
         for (Map<String, Object> item : allData){
             int orderStatus = Integer.parseInt(item.get("status")+"");
             if (status==orderStatus || (status==3 && orderStatus==4)){
                 orderList.add(item);
             }
         }
-        Log.d("status", status+"");
         courseOrderAdapter.setData(orderList);
     }
 
