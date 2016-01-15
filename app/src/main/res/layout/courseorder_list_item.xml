@@ -7,7 +7,7 @@
       android:layout_height="wrap_content">
 
     <LinearLayout
-        android:layout_weight="4"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_marginLeft="10dp"
@@ -34,25 +34,10 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/order_item_ll"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_width="0dp"
-        android:visibility="gone"
-        android:layout_height="match_parent">
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/course_order_bt_pay"
-            android:text="支付"
-            android:layout_width="match_parent"
-            android:layout_height="0dp" />
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/course_order_bt_delete"
-            android:text="删除"
-            android:layout_width="match_parent"
-            android:layout_height="0dp" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/order_bt_confirm"
+        android:text="确认"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
 
 </LinearLayout>

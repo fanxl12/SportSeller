@@ -104,7 +104,7 @@ public class CourseOrder extends BaseActivity {
                 });
     }
 
-    private void updateData() {
+    public void updateData() {
         for (Fragment fragment : fragments){
             OrderNotice oN = (OrderNotice) fragment;
             oN.dataChange();

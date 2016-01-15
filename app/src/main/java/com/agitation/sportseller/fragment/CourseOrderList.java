@@ -9,9 +9,15 @@ import android.widget.ListView;
 
 import com.agitation.sportseller.BaseFragment;
 import com.agitation.sportseller.R;
+import com.agitation.sportseller.activity.CourseOrder;
 import com.agitation.sportseller.adapter.CourseOrderAdapter;
 import com.agitation.sportseller.inter.OrderNotice;
 import com.agitation.sportseller.utils.DataHolder;
+import com.agitation.sportseller.utils.MapTransformer;
+import com.agitation.sportseller.utils.Mark;
+import com.agitation.sportseller.utils.ToastUtils;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +38,8 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
     private ListView tickey_list_lv;
     private int status;
     public static final String STATUS_NAME_KEY = "STATUS_NAME_KEY";
-    private String orderId;
     private DataHolder dataHolder;
+    private boolean isRefreshing = false;
 
     public static CourseOrderList getInstance(int status){
         Bundle bundle = new Bundle();
@@ -68,31 +74,32 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
 
         courseOrderAdapter.setOnBtnClickListener(new CourseOrderAdapter.OnBtnClickListener() {
             @Override
-            public void onBtnClickListener(Map<String, Object> item, int action) {
-
-                orderId = item.get("id") + "";
-//                if (action == CourseOrderAdapter.ACTION_ORDER_DELETE) {
-//                    deleteOrder();
-//                } else {
-//                    int status = Integer.parseInt(item.get("status") + "");
-//                    if (status == Mark.ORDER_STATUS_UNPAY) {
-//                        double totalMoney = Double.parseDouble(item.get("totalMoney") + "");
-//                        pay(totalMoney, orderId, item.get("name") + "", item.get("payWay") + "");
-//                    } else if (status == Mark.ORDER_STATUS_UNADVICES) {
-//                        Intent intent = new Intent(getContext(), Comment.class);
-//                        intent.putExtra("courseId", item.get("courseId") + "");
-//                        intent.putExtra("name", item.get("name") + "");
-//                        intent.putExtra("time", item.get("createDate") + "");
-//                        intent.putExtra("address", item.get("address") + "");
-//                        intent.putExtra("orderId", orderId);
-//                        startActivityForResult(intent, 140);
-//                    }
-//                }
+            public void onBtnClickListener(Map<String, Object> item) {
+                confirmOrder(item);
             }
         });
     }
 
+    private void confirmOrder(Map<String, Object> item){
+        mActivity.showLoadingDialog();
+        String url = Mark.getServerIp() + "/api/v1/order/confirmOrder";
+        mActivity.aq.transformer(new MapTransformer()).auth(dataHolder.getBasicHandle())
+                .ajax(url, item, Map.class, new AjaxCallback<Map>(){
 
+                    @Override
+                    public void callback(String url, Map object, AjaxStatus status) {
+                        mActivity.dismissLoadingDialog();
+                        if (object!=null){
+                            if (Boolean.parseBoolean(object.get("result")+"")){
+                                ToastUtils.showToast(mActivity, "订单确认成功");
+                                ((CourseOrder)mActivity).updateData();
+                            }else{
+                                ToastUtils.showToast(mActivity, object.get("error")+"");
+                            }
+                        }
+                    }
+                });
+    }
 
     protected void processLogic() {
         BGAStickinessRefreshViewHolder stickinessRefreshViewHolder = new BGAStickinessRefreshViewHolder(getActivity(), false);
@@ -111,6 +118,7 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
     public void dataChange() {
         if (courseOrderAdapter==null)return;
         List<Map<String, Object>> allData = dataHolder.getOrderList();
+        orderList.clear();
         for (Map<String, Object> item : allData){
             int orderStatus = Integer.parseInt(item.get("status")+"");
             if (status==orderStatus || (status==3 && orderStatus==4)){
@@ -118,11 +126,16 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
             }
         }
         courseOrderAdapter.setData(orderList);
+        if (isRefreshing){
+            isRefreshing = false;
+            swipe_container.endRefreshing();
+        }
     }
 
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout bgaRefreshLayout) {
-
+        ((CourseOrder)mActivity).updateData();
+        isRefreshing = true;
     }
 
     @Override
