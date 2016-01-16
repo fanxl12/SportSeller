@@ -11,6 +11,7 @@ import com.agitation.sportseller.BaseActivity;
 import com.agitation.sportseller.R;
 import com.agitation.sportseller.utils.MapTransformer;
 import com.agitation.sportseller.utils.Mark;
+import com.agitation.sportseller.utils.SecurityUtils;
 import com.agitation.sportseller.utils.SharePreferenceUtil;
 import com.agitation.sportseller.utils.ToastUtils;
 import com.androidquery.callback.AjaxCallback;
@@ -93,10 +94,15 @@ public class Login extends BaseActivity implements View.OnClickListener {
         }
 
         String url = Mark.getServerIp()+"/baseApi/login";
+
+        String str = "My name is fxl！";
+
         Map<String,Object> param = new HashMap<>();
-        param.put("userName",name);
+        param.put("userName", name);
         param.put("passWord", password);
         param.put("roles", "seller");
+        param.put("signStr", SecurityUtils.signStr(str, this));
+        param.put("jia", SecurityUtils.encryptionStr(param.get("signStr")+"", this));
         showLoadingDialog();
         aq.transformer(new MapTransformer())
                 .ajax(url, param, Map.class, new AjaxCallback<Map>() {

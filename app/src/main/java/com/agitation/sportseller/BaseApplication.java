@@ -3,8 +3,11 @@ package com.agitation.sportseller;
 import android.app.Application;
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.alibaba.wireless.security.jaq.JAQException;
+import com.alibaba.wireless.security.jaq.SecurityInit;
 import com.umeng.message.PushAgent;
 import com.umeng.message.UTrack;
 import com.umeng.message.UmengMessageHandler;
@@ -20,6 +23,16 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         initPush();
+        initSecurity();
+    }
+
+    private void initSecurity() {
+        //初始化
+        try {
+            SecurityInit.Initialize(getApplicationContext());
+        } catch (JAQException e) {
+            Log.e("SecurityInit", "errorCode =" + e.getErrorCode());
+        }
     }
 
     private void initPush() {
