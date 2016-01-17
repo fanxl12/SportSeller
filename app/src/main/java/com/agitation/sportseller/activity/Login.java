@@ -5,15 +5,17 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.agitation.sportseller.BaseActivity;
 import com.agitation.sportseller.R;
 import com.agitation.sportseller.utils.MapTransformer;
 import com.agitation.sportseller.utils.Mark;
-import com.agitation.sportseller.utils.SecurityUtils;
 import com.agitation.sportseller.utils.SharePreferenceUtil;
 import com.agitation.sportseller.utils.ToastUtils;
+import com.alibaba.wireless.security.jaq.JAQException;
+import com.alibaba.wireless.security.jaq.SecurityInit;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.umeng.message.PushAgent;
@@ -41,19 +43,22 @@ public class Login extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.login);
         initToolbar();
         init();
+        initSecurity();
+    }
+
+    private void initSecurity() {
+        //初始化
+        try {
+            SecurityInit.Initialize(this);
+        } catch (JAQException e) {
+            Log.e("SecurityInit", "errorCode =" + e.getErrorCode());
+        }
     }
 
     private void initToolbar() {
         if (toolbar!=null){
             setSupportActionBar(toolbar);
         }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
     }
 
     private void init() {
@@ -101,8 +106,8 @@ public class Login extends BaseActivity implements View.OnClickListener {
         param.put("userName", name);
         param.put("passWord", password);
         param.put("roles", "seller");
-        param.put("signStr", SecurityUtils.signStr(str, this));
-        param.put("jia", SecurityUtils.encryptionStr(param.get("signStr")+"", this));
+//        param.put("signStr", SecurityUtils.signStr(str, this));
+//        param.put("jia", SecurityUtils.encryptionStr(param.get("signStr")+"", this));
         showLoadingDialog();
         aq.transformer(new MapTransformer())
                 .ajax(url, param, Map.class, new AjaxCallback<Map>() {
@@ -141,16 +146,18 @@ public class Login extends BaseActivity implements View.OnClickListener {
     }
 
     private void updateDeviceTokens() {
-        String url = Mark.getServerIp() + "/baseApi/updateDeviceTokens";
-        Map<String, Object> param = new HashMap<>();
-        param.put("deviceTokens", UmengRegistrar.getRegistrationId(this));
-        aq.transformer(new MapTransformer()).auth(dataHolder.getBasicHandle())
-                .ajax(url, param, Map.class, new AjaxCallback<Map>(){
-                    @Override
-                    public void callback(String url, Map info, AjaxStatus status) {
-                        if (info!=null){}
-                    }
-                });
+        String deviceTokens = UmengRegistrar.getRegistrationId(this);
+        if (deviceTokens!=null && !TextUtils.isEmpty(deviceTokens)){
+            String url = Mark.getServerIp() + "/baseApi/updateDeviceTokens";
+            Map<String, Object> param = new HashMap<>();
+            param.put("deviceTokens", deviceTokens);
+            aq.transformer(new MapTransformer()).auth(dataHolder.getBasicHandle())
+                    .ajax(url, param, Map.class, new AjaxCallback<Map>(){
+                        @Override
+                        public void callback(String url, Map info, AjaxStatus status) {
+                        }
+                    });
+        }
     }
 
     @Override
@@ -161,4 +168,8 @@ public class Login extends BaseActivity implements View.OnClickListener {
                 break;
         }
     }
+
+
+
+
 }

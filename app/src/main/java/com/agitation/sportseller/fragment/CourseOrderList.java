@@ -92,7 +92,7 @@ public class CourseOrderList extends BaseFragment implements OrderNotice, BGARef
                         if (object!=null){
                             if (Boolean.parseBoolean(object.get("result")+"")){
                                 ToastUtils.showToast(mActivity, "订单确认成功");
-                                ((CourseOrder)mActivity).updateData();
+                                ((CourseOrder)mActivity).getCourseOrderList();
                             }else{
                                 ToastUtils.showToast(mActivity, object.get("error")+"");
                             }

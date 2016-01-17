@@ -119,6 +119,14 @@
             android:textColor="@color/md_white_1000"
             android:textStyle="bold"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_marginTop="10dp"
+            android:textSize="12sp"
+            android:text="—High运动商户版"/>
+
     </LinearLayout>
 
 

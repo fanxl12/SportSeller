@@ -27,7 +27,7 @@ public class SecurityUtils {
         SecurityCipher securityCipher = new SecurityCipher(context);
         try {
             //"ka1":加密用的密钥key
-            String encryptString = securityCipher.encryptString(sourceStr, "ka1");
+            String encryptString = securityCipher.encryptString(sourceStr, KEY);
             return  encryptString;
         } catch (JAQException e) {
             Log.e("encryption", "errorCode =" + e.getErrorCode());
@@ -46,7 +46,7 @@ public class SecurityUtils {
         SecurityCipher securityCipher = new SecurityCipher(context);
         try {
             //"ka1"		 :加密用的密钥key
-            byte[] encryptionBytes = securityCipher.encryptBinary(sourceByte, "ka1");
+            byte[] encryptionBytes = securityCipher.encryptBinary(sourceByte, KEY);
             return encryptionBytes;
         } catch (JAQException e) {
             Log.e("encryption", "errorCode =" + e.getErrorCode());
@@ -64,7 +64,7 @@ public class SecurityUtils {
         //安全加解密
         SecurityCipher securityCipher = new SecurityCipher(context);
         try {
-            String decryptString = securityCipher.decryptString(sourceStr, "ka1");
+            String decryptString = securityCipher.decryptString(sourceStr, KEY);
             return decryptString;
         } catch (JAQException e) {
             Log.e("decrypt", "errorCode =" + e.getErrorCode());
@@ -83,7 +83,7 @@ public class SecurityUtils {
         SecurityCipher securityCipher = new SecurityCipher(context);
         try {
             //"ka1":解密用的密钥key
-            byte[] decryptBytes = securityCipher.decryptBinary(sourceByte, "ka1");
+            byte[] decryptBytes = securityCipher.decryptBinary(sourceByte, KEY);
             return decryptBytes;
         } catch (JAQException e) {
             Log.e("decrypt", "errorCode =" + e.getErrorCode());
@@ -101,7 +101,7 @@ public class SecurityUtils {
         SecuritySignature securitySignature = new SecuritySignature(context);
         try {
             //签名使用的指定密钥key
-            String signStr = securitySignature.sign(sourceStr, "ka1");
+            String signStr = securitySignature.sign(sourceStr, KEY);
             //将签名结果和原始数据一起发送到服务端，服务端根据原始数据重新计算签名，并与发送的签名进行比对，进而完成数据校验。
             return signStr;
         } catch (JAQException e) {
@@ -122,13 +122,6 @@ public class SecurityUtils {
         try {
             //保存"helloword"
             result = securityStorage.putString(key, sourceStr);
-
-            //获取"helloword"
-            securityStorage.getString("mykey");
-
-            //删除"helloword"
-            securityStorage.removeString("mykey");
-
         } catch (JAQException e) {
             Log.e("securitySave", "errorCode =" + e.getErrorCode());
         }
